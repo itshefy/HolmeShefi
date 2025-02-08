@@ -15,7 +15,9 @@ const SalesDashboard = () => {
     { id: 'comparison', name: 'השוואת מתחרים', icon: '📊' }
   ];
 
-  const renderTool = () => {
+  // רק פונקציה אחת render
+  const renderActiveTab = () => {
+    console.log("Rendering tab:", activeTab);
     switch (activeTab) {
       case 'calculator':
         return <PriceCalculator />;
@@ -31,7 +33,7 @@ const SalesDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen bg-gray-100 p-4" dir="rtl">
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6">
           {/* כותרת */}
@@ -41,12 +43,12 @@ const SalesDashboard = () => {
           </div>
 
           {/* טאבים */}
-          <div className="flex space-x-4 mb-6 border-b">
+          <div className="flex mb-6 border-b">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`p-4 ${
+                className={`p-4 ml-4 ${
                   activeTab === tab.id
                     ? 'border-b-2 border-blue-600 text-blue-600'
                     : 'text-gray-600 hover:text-blue-600'
@@ -60,7 +62,7 @@ const SalesDashboard = () => {
 
           {/* תוכן */}
           <div className="bg-gray-50 rounded-lg p-4">
-            {renderTool()}
+            {renderActiveTab()}
           </div>
         </div>
       </div>
