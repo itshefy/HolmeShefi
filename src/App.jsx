@@ -1,12 +1,12 @@
 // src/App.jsx
 import React from 'react';
-import SalesFlow from './components/SalesFlow';
+import SalesTools from './components/SalesTools';
 
 function App() {
   return (
-    <main className="min-h-screen bg-gray-50">
-      <SalesFlow />
-    </main>
+    <div className="min-h-screen bg-gray-50" dir="rtl">
+      <SalesTools />
+    </div>
   );
 }
 
