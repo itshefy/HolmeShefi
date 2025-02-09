@@ -23,3 +23,79 @@ input, select, textarea {
   direction: rtl;
   text-align: right;
 }
+
+@media screen and (max-width: 430px) { /* אייפון 15 */
+  html {
+    font-size: 14px; /* פונט בסיס מותאם למובייל */
+  }
+
+  /* עטיפה כללית */
+  .container {
+    padding: 0.75rem;
+    max-width: 100%;
+  }
+
+  /* כותרות */
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+
+  .text-xl {
+    font-size: 1.25rem;
+  }
+
+  /* תפריט ראשי */
+  .tab-container {
+    padding: 0.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .tab-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* מרווחים מותאמים */
+  .space-y-4 {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* כפתורים */
+  button, 
+  .btn {
+    min-height: 44px; /* גודל מינימלי לנגישות */
+    padding: 0.75rem 1rem;
+  }
+
+  /* תיבות בחירה */
+  select {
+    min-height: 44px;
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+
+  /* תיבות סימון */
+  input[type="checkbox"] {
+    min-width: 24px;
+    min-height: 24px;
+  }
+
+  /* כרטיסיות תוכן */
+  .card {
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 0.5rem;
+  }
+}
+
+/* כללי נגישות */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

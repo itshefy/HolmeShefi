@@ -6,6 +6,7 @@ import UrgencyTools from './UrgencyTools';
 import ComparisonTools from './ComparisonTools';
 
 const SalesDashboard = () => {
+
   const [activeTab, setActiveTab] = useState('calculator');
 
   const tabs = [
