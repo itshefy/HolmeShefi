@@ -1070,8 +1070,15 @@ const ExperienceStep = ({ profile, onUpdate }) => {
  );
 };
 
+const SummaryStep = ({ 
+  profile, 
+  salesData, 
+  setSalesData, 
+  activeStep, 
+  calculateRecommendedPlan, // Add this
+  generateNewPitch 
+}) => {
 
-const SummaryStep = ({ profile, salesData, generateNewPitch }) => {
  const [showPriceDetails, setShowPriceDetails] = useState(false);
  const [showLoyaltyInfo, setShowLoyaltyInfo] = useState(false);
  const [showSectionCode, setShowSectionCode] = useState(false);
@@ -1079,17 +1086,20 @@ const SummaryStep = ({ profile, salesData, generateNewPitch }) => {
  const [localGeneratedPitch, setLocalGeneratedPitch] = useState(null);
 
  useEffect(() => {
-   if (activeStep === 4) {
-     setSalesData(prev => ({
-       ...prev,
-       recommendedPlan: calculateRecommendedPlan(),
-     }));
-     if (!salesData.generatedPitch) {
-       generateCustomPitch();
-     }
-     setLocalGeneratedPitch(salesData.generatedPitch);
-   }
- }, [activeStep, salesData.generatedPitch]);
+  if (activeStep === 4) {
+    const recommendedPlan = calculateRecommendedPlan();
+    setSalesData(prev => ({
+      ...prev,
+      recommendedPlan: recommendedPlan,
+    }));
+    
+    // Pass the existing generateNewPitch function
+    if (!salesData.generatedPitch) {
+      generateNewPitch();
+    }
+    setLocalGeneratedPitch(salesData.generatedPitch);
+  }
+}, [activeStep, salesData.generatedPitch]);
 
  if (!localGeneratedPitch) {
    return (
@@ -1643,6 +1653,9 @@ const ClosingGenerator = () => {
            {React.createElement(progressSteps[activeStep].component, {
              profile,
              salesData,
+             setSalesData,
+             activeStep,
+             calculateRecommendedPlan,
              onUpdate: handleProfileUpdate,
              generateNewPitch: generateCustomPitch
            })}
