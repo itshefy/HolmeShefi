@@ -32,37 +32,36 @@ const SalesDashboard = () => {
         return <PriceCalculator />;
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gray-100 p-4" dir="rtl">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6">
+return (
+    <div className="min-h-screen bg-gray-100 p-3" dir="rtl">
+      <div className="max-w-xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-4">
           {/* כותרת */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold">כלי מכירות הולמס פלייס</h1>
-            <p className="text-gray-600">כל הכלים שצריך בשביל לסגור מכירה</p>
+          <div className="mb-4">
+            <h1 className="text-2xl font-bold">כלי מכירות הולמס פלייס</h1>
+            <p className="text-gray-600 text-sm">כל הכלים שצריך בשביל לסגור מכירה</p>
           </div>
 
           {/* טאבים */}
-          <div className="flex mb-6 border-b">
+          <div className="flex overflow-x-auto mb-4 border-b tab-container">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`p-4 ml-4 ${
+                className={`p-3 ml-4 text-sm whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-600 hover:text-blue-600'
+                    : 'text-gray-600'
                 }`}
               >
-                <span className="text-xl">{tab.icon}</span>
-                <span className="mr-2">{tab.name}</span>
+                <span className="text-lg ml-1">{tab.icon}</span>
+                {tab.name}
               </button>
             ))}
           </div>
 
           {/* תוכן */}
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 rounded-lg p-3">
             {renderActiveTab()}
           </div>
         </div>
