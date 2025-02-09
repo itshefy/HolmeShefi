@@ -2,16 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    direction: rtl;
-  }
-  
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
-  }
+:root {
+  direction: rtl;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
 }
 
 /* Typography RTL */
@@ -26,8 +24,11 @@ input, select, textarea {
   text-align: right;
 }
 
-/* Media Queries */
-@media screen and (max-width: 430px) {
+@media screen and (max-width: 430px) { /* אייפון 15 */
+  html {
+    font-size: 14px; /* פונט בסיס מותאם למובייל */
+  }
+
   /* עטיפה כללית */
   .container {
     padding: 0.75rem;
@@ -36,11 +37,11 @@ input, select, textarea {
 
   /* כותרות */
   .text-2xl {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
   }
 
   .text-xl {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
   }
 
   /* תפריט ראשי */
@@ -64,20 +65,21 @@ input, select, textarea {
   /* כפתורים */
   button, 
   .btn {
-    min-height: 44px;
+    min-height: 44px; /* גודל מינימלי לנגישות */
     padding: 0.75rem 1rem;
   }
 
   /* תיבות בחירה */
   select {
     min-height: 44px;
+    font-size: 1rem;
     padding: 0.5rem;
   }
 
   /* תיבות סימון */
   input[type="checkbox"] {
-    min-width: 1.5rem;
-    min-height: 1.5rem;
+    min-width: 24px;
+    min-height: 24px;
   }
 
   /* כרטיסיות תוכן */
@@ -96,9 +98,4 @@ input, select, textarea {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* עטיפה ראשית */
-.max-w-7xl {
-  max-width: 80rem;
 }
