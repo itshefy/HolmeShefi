@@ -1,586 +1,674 @@
-// src/components/SalesTools/steps/SummaryStep.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    ThumbsUp, 
-    ThumbsDown, 
-    Award, 
-    Check, 
-    Info, 
-    Clock, 
-    Calendar, 
-    Users,
-    Target,
-    Star,
-    TrendingUp,
-    Heart,
-    Dumbbell
+    Clock, Calendar, Users, Target, Star,
+    TrendingUp, Heart, Dumbbell, Flame,
+    Sparkles, Check, Sun, Moon
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { CLIENT_PROFILE } from '../config/profiles';
 
 const SummaryStep = ({ profile, onUpdate }) => {
     const [dealStatus, setDealStatus] = useState(null);
-    const [showFeedbackForm, setShowFeedbackForm] = useState(false);
-    const [showRejectionResponse, setShowRejectionResponse] = useState(false);
     const [rejectionReason, setRejectionReason] = useState(null);
     const [monthlyPrice, setMonthlyPrice] = useState(0);
     const [savedDealData, setSavedDealData] = useState(null);
 
-    const getRecommendedClasses = (goal, painPoints) => {
-        const classRecommendations = {
-            health: [
-                { name: "שחייה", benefit: "פעילות ללא עומס על המפרקים, מצוינת להקלה על כאבים", forPain: true },
-                { name: "התעמלות בריאותית", benefit: "מחזקת את הגוף בצורה מבוקרת ובטוחה" },
-                { name: "פלדנקרייז", benefit: "משפרת יציבה ומקלה על כאבים כרוניים", forPain: true },
-                { name: "יוגה", benefit: "לגמישות, יציבה ושלווה נפשית" }
-            ],
-            shape: [
-                { name: "BODY PUMP", benefit: "לחיטוב ועיצוב הגוף המושלם" },
-                { name: "HIIT", benefit: "לשריפת שומנים מקסימלית" },
-                { name: "ספינינג", benefit: "לשיפור סיבולת וכושר" },
-                { name: "עיצוב דינאמי", benefit: "לחיטוב והידוק כל הגוף" }
-            ],
-            stress: [
-                { name: "יוגה", benefit: "לאיזון גוף ונפש" },
-                { name: "פילאטיס", benefit: "לחיזוק ושליטה" },
-                { name: "BODY BALANCE", benefit: "לשלווה פנימית" },
-                { name: "מדיטציה", benefit: "להפחתת מתחים" }
-            ],
-            weight_loss: [
-                { name: "HIIT", benefit: "לשריפת קלוריות מוגברת" },
-                { name: "ספינינג", benefit: "לשריפת שומן אפקטיבית" },
-                { name: "אירובי", benefit: "לבניית סיבולת" },
-                { name: "עיצוב", benefit: "לחיטוב והידוק" }
-            ]
+    // מערך ההמלצות המלא - ממויין לפי מטרות
+    const goalRecommendations = useMemo(() => ({
+        "חיזוק הגב": [
+            { 
+                activity: "שחייה",
+                reason: "פעילות המחזקת את שרירי הגב באופן טבעי",
+                icon: "🏊‍♂️",
+                benefits: [
+                    "פעילות ללא עומס על המפרקים",
+                    "שיפור טווח תנועה",
+                    "חיזוק שרירי הגב"
+                ]
+            },
+            { 
+                activity: "חדר כושר",
+                reason: "מכשירים מקצועיים לחיזוק שרירי הגב",
+                icon: "💪",
+                benefits: [
+                    "מכשירים מותאמים",
+                    "חיזוק שרירי התמיכה",
+                    "שיפור היציבה"
+                ]
+            }
+        ],
+        "הורדת כאבים": [
+            { 
+                activity: "שחייה",
+                reason: "תנועה במים מקלה על העומס במפרקים",
+                icon: "🏊‍♂️",
+                benefits: [
+                    "תנועה ללא עומס",
+                    "שחרור שרירים",
+                    "הקלה על כאבים"
+                ]
+            },
+            { 
+                activity: "חדר כושר",
+                reason: "חיזוק מבוקר של קבוצות שרירים",
+                icon: "💪",
+                benefits: [
+                    "חיזוק הדרגתי",
+                    "מכשירים מותאמים",
+                    "בניית כוח ויציבות"
+                ]
+            }
+        ],
+        "שיפור גמישות": [
+            { 
+                activity: "שחייה",
+                reason: "תנועה במים לשיפור טווחי תנועה",
+                icon: "🏊‍♂️",
+                benefits: [
+                    "תנועה בכל המישורים",
+                    "שיפור טווח תנועה",
+                    "גמישות מוגברת"
+                ]
+            },
+            { 
+                activity: "חדר כושר",
+                reason: "מתיחות ותרגילים לשיפור גמישות",
+                icon: "💪",
+                benefits: [
+                    "אזור מתיחות מרווח",
+                    "ציוד עזר לגמישות",
+                    "שיפור טווחי תנועה"
+                ]
+            }
+        ],
+        "חיטוב והידוק": [
+            { 
+                activity: "חדר כושר",
+                reason: "מגוון מכשירים לעיצוב הגוף",
+                icon: "💪",
+                benefits: [
+                    "מכשירי כוח מתקדמים",
+                    "אזורי משקולות חופשיות",
+                    "ציוד קרדיו מגוון"
+                ]
+            },
+            { 
+                activity: "שחייה",
+                reason: "אימון גוף כולל להידוק ועיצוב",
+                icon: "🏊‍♂️",
+                benefits: [
+                    "התנגדות המים",
+                    "אימון גוף מלא",
+                    "שריפת קלוריות"
+                ]
+            }
+        ],
+        "העלאת אנרגיה": [
+            { 
+                activity: "חדר כושר",
+                reason: "אימוני כוח וקרדיו להעלאת המרץ",
+                icon: "💪",
+                benefits: [
+                    "שיפור סיבולת",
+                    "העלאת כושר",
+                    "חיזוק כללי"
+                ]
+            },
+            { 
+                activity: "שחייה",
+                reason: "פעילות אירובית מהנה",
+                icon: "🏊‍♂️",
+                benefits: [
+                    "שיפור סיבולת לב-ריאה",
+                    "אימון מהנה",
+                    "רעננות"
+                ]
+            }
+        ]
+    }), []);
+
+    // חישוב מחיר
+    useEffect(() => {
+        const basePrice = {
+            student: 322,
+            soldier: 211,
+            senior: 312,
+            regular: 393
+        }[profile.status] || 393;
+        
+        setMonthlyPrice(basePrice);
+    }, [profile.status]);
+
+    const handleCloseDeal = async () => {
+        const triggerConfetti = (options = {}) => {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#FFD700', '#FFA500', '#FF4500'],
+                ...options
+            });
         };
 
-        const classes = classRecommendations[goal] || classRecommendations.health;
-        if (painPoints) {
-            return classes.filter(c => c.forPain).concat(classes.filter(c => !c.forPain));
-        }
-        return classes;
+        triggerConfetti();
+        
+        setTimeout(() => {
+            triggerConfetti({
+                particleCount: 50,
+                spread: 90,
+                origin: { y: 0.7 }
+            });
+        }, 500);
+
+        const dealData = {
+            name: profile.name,
+            gender: profile.gender,
+            status: profile.status,
+            goals: profile.subGoals,
+            price: monthlyPrice,
+            dateTime: new Date().toISOString(),
+            sectionCode: {
+                student: '489',
+                soldier: '842',
+                senior: '894',
+                regular: '721'
+            }[profile.status] || '721',
+            recommendedClasses: getRecommendedClasses(profile.subGoals)
+        };
+
+        setDealStatus('closed');
+        setSavedDealData(dealData);
+        localStorage.setItem('lastDeal', JSON.stringify(dealData));
     };
 
-    const generatePersonalizedPitch = () => {
-        const genderSuffix = profile.gender === 'female' ? 'ה' : '';
-        const goals = CLIENT_PROFILE.goals[profile.goal];
-        const recommendedClasses = getRecommendedClasses(profile.goal, profile.painPoints);
-        
-        let classesText = recommendedClasses
-            .map(c => `${c.name} (${c.benefit})`)
-            .join(', ');
-
-        return {
-            opening: `${profile.name}, בנינו בשבילך תוכנית מדויקת שתעזור לך להשיג את כל המטרות שלך!`,
-            personalizedIntro: profile.status === 'student' ? 
-                `כסטודנט${genderSuffix}, בחרנו עבורך תוכנית שמשתלבת מושלם עם הלימודים במחיר סטודנטיאלי` :
-                profile.status === 'soldier' ? 
-                `כחייל${genderSuffix} בשירות סדיר, התאמנו לך מסלול גמיש במחיר מיוחד` :
-                profile.status === 'senior' ? 
-                `בנינו תוכנית מותאמת במיוחד לגיל השלישי, עם דגש על בריאות ואיכות חיים` :
-                `התוכנית שלך מותאמת בדיוק למטרות ולזמנים שבחרת`,
-            recommendedClasses: classesText,
-            timeRecommendation: profile.availability.includes('morning') ?
-                `שעות הבוקר מושלמות להתחלת היום באנרגיות, עם פחות עומס ויותר זמינות של מכשירים` :
-                profile.availability.includes('evening') ?
-                `בערב יש לנו את מגוון השיעורים הכי גדול - תוכל${genderSuffix} לבחור בדיוק מה שמתאים לך` :
-                `בחרת שעות מצוינות שיאפשרו לך להתאמן בנוחות מקסימלית`,
-            experienceLevel: profile.experience === 'beginner' ?
-                `כמתחיל${genderSuffix}, תקבל${genderSuffix} ליווי צמוד מהצוות המקצועי שלנו. נלמד אותך את כל מה שצריך לדעת, צעד אחר צעד` :
-                profile.experience === 'advanced' ?
-                `כמתאמן${genderSuffix} מנוס${genderSuffix}, תוכל${genderSuffix} ליהנות מהציוד המתקדם ביותר ומשיעורים ברמה גבוהה` :
-                `עם הניסיון שיש לך, תוכל${genderSuffix} להתקדם בקצב המתאים לך עם הצוות המקצועי שלנו`
-        };
+    const getRecommendedClasses = (goals) => {
+        return goals
+            .map(goal => (goalRecommendations[goal] || []))
+            .flat()
+            .map(r => r.activity)
+            .filter((v, i, a) => a.indexOf(v) === i)
+            .slice(0, 4);
     };
 
     const generateRejectionResponse = (reason) => {
         const genderSuffix = profile.gender === 'female' ? 'ה' : '';
+        const dailyPrice = Math.round(monthlyPrice / 30);
         
         const responses = {
             price: {
-                title: `${profile.name}, בוא${genderSuffix} נחשוב על זה רגע יחד`,
-                points: [
-                    `פחות מ-${Math.round(monthlyPrice / 30)}₪ ליום - פחות ממנת פלאפל!`,
-                    `כולל גישה חופשית ל-${profile.gender === 'female' ? '50+' : '40+'} שיעורים בשבוע`,
-                    `צוות מקצועי שילווה אותך לאורך כל הדרך`,
-                    profile.goal === 'health' ? 
-                        'שיעורי שחייה, פלדנקרייז והתעמלות בריאותית ללא הגבלה' :
-                    profile.goal === 'shape' ? 
-                        'כל שיעורי העיצוב, HIIT וספינינג כלולים' :
-                        'כל השיעורים והמתקנים כלולים במחיר'
+                title: `${profile.name}, בוא${genderSuffix} נדבר על ההשקעה בבריאות שלך`,
+                mainContent: [
+                    `${dailyPrice}₪ ליום - פחות מארוחת בוקר בחוץ!`,
+                    `גישה למתקנים מקצועיים ומגוונים`,
+                    `בריכה מקורה ומחוממת`,
+                    `חדר כושר מאובזר`
                 ],
                 comparison: [
-                    `במקום לבזבז על קפה ב-15₪ ליום, השקע${genderSuffix} בבריאות שלך`,
-                    `חישבנו שעלות ממוצעת לשיעור יוצאת ${Math.round(monthlyPrice / 15)}₪ בלבד`,
-                    `כולל שימוש חופשי בכל המתקנים והשיעורים`
+                    {
+                        title: 'חדר כושר רגיל',
+                        price: `${Math.round(monthlyPrice * 1.3)}₪`,
+                        note: 'לחודש, בלי בריכה'
+                    },
+                    {
+                        title: 'בריכה בלבד',
+                        price: `${Math.round(monthlyPrice * 1.1)}₪`,
+                        note: 'לחודש, בלי חדר כושר'
+                    },
+                    {
+                        title: 'המחיר שלנו',
+                        price: `${monthlyPrice}₪`,
+                        note: 'לחודש, הכל כלול!'
+                    }
                 ],
-                urgency: [
-                    `המחיר הזה בתוקף רק היום`,
-                    `נשארו 3 מקומות אחרונים במחיר הזה`,
-                    profile.status ? 'מחיר מיוחד למעמד שלך שלא תמיד זמין' : 'מחיר השקה שעומד להסתיים'
+                savings: [
+                    `חיסכון של ${Math.round(monthlyPrice * 0.3)}₪ לעומת מנוי נפרד`,
+                    `${dailyPrice}₪ ליום לכל המתקנים`,
+                    `כולל חדר כושר ובריכה`
                 ]
             },
             time: {
-                title: `${profile.name}, יש לנו פתרון מושלם בשבילך`,
-                points: [
-                    `פתוח מ-6:00 בבוקר עד 23:00 בלילה`,
-                    `למעלה מ-50 שיעורים שונים בשבוע`,
-                    profile.availability.includes('morning') ? 
-                        'בשעות הבוקר התפוסה נמוכה במיוחד!' :
-                        'שיעורי ערב מגוונים בכל השעות',
-                    `אפשרות להקפיא מנוי בעת הצורך`
+                title: `${profile.name}, יש לנו שעות פעילות נוחות`,
+                mainContent: [
+                    `פתוח ${profile.availability.includes('morning') ? 'מ-6:00 בבוקר' : ''}${profile.availability.includes('evening') ? ' עד 23:00 בלילה' : ''}`,
+                    `בריכה פעילה לאורך כל היום`,
+                    `חדר כושר זמין בכל שעות הפעילות`,
+                    profile.gender === 'female' ? 'שעות שחייה נפרדות לנשים' : 'שעות פעילות נוחות'
                 ],
-                customTimes: profile.availability.map(time => 
-                    CLASS_SCHEDULE.timeSlots[time]?.activities || []
-                ).flat(),
-                urgency: [
-                    `השבוע נפתחו שיעורים חדשים בדיוק בשעות שביקשת`,
-                    `מספר המקומות בשיעורים מוגבל`,
-                    `הרשמה היום מבטיחה את המקום שלך בשיעורים`
-                ]
+                schedule: {
+                    morning: {
+                        title: 'שעות הבוקר',
+                        benefits: [
+                            'פחות עומס במתקנים',
+                            'חניה זמינה',
+                            'אווירה רגועה'
+                        ]
+                    },
+                    afternoon: {
+                        title: 'שעות הצהריים',
+                        benefits: [
+                            'זמין אחרי העבודה',
+                            'מתקנים מגוונים',
+                            'אווירה נעימה'
+                        ]
+                    },
+                    evening: {
+                        title: 'שעות הערב',
+                        benefits: [
+                            'פתוח עד מאוחר',
+                            'גמישות בזמנים',
+                            'נגיש בסוף היום'
+                        ]
+                    }
+                }
             },
             location: {
-                title: `${profile.name}, חשבנו על הכל בשבילך`,
-                points: [
-                    `חניה חינם לכל המתאמנים`,
-                    `ממש ליד תחנת האוטובוס`,
-                    `רוב המתאמנים מגיעים תוך פחות מ-15 דקות`,
-                    `אפשרות להקפיא מנוי בחודשי הקיץ/חגים`
+                title: `${profile.name}, המיקום נוח ונגיש`,
+                mainContent: [
+                    'חניה חינם וזמינה',
+                    '3 דקות הליכה מהתחנה המרכזית',
+                    'נגיש בתחבורה ציבורית',
+                    profile.gender === 'female' ? 'סביבה בטוחה ומוארת' : 'סביבה נוחה ונגישה'
                 ],
-                benefits: [
-                    `מתקנים חדישים ומתקדמים`,
-                    `צוות מקצועי זמין תמיד`,
-                    `אווירה ביתית ונעימה`
-                ],
-                urgency: [
-                    `המחיר המיוחד הזה רק לנרשמים היום`,
-                    `שווה להתחיל כבר עכשיו ולא לחכות`,
-                    `בחודש הבא המחירים עולים`
+                facilities: [
+                    '🅿️ חניה חינם',
+                    '🚌 תחבורה ציבורית',
+                    '🏊‍♂️ בריכה מקורה',
+                    '💪 חדר כושר מאובזר'
                 ]
             },
             think: {
-                title: `${profile.name}, הנה מה שהמתאמנים שלנו אומרים`,
-                points: [
-                    `92% מהמתאמנים אומרים שהם מצטערים שלא התחילו קודם`,
-                    `88% רואים שיפור משמעותי תוך חודש`,
-                    profile.goal === 'health' ? 
-                        '95% מדווחים על שיפור בכאבים ובתנועתיות' :
-                    profile.goal === 'shape' ? 
-                        '90% רואים תוצאות תוך חודשיים' :
-                        '93% מרגישים שיפור באיכות החיים',
-                    `מעל 1,000 מתאמנים קבועים כבר נהנים`
+                title: `${profile.name}, בוא${genderSuffix} נראה למה כדאי להתחיל`,
+                mainContent: [
+                    'מתקנים מקצועיים ומגוונים',
+                    'בריכה מקורה ומחוממת',
+                    'חדר כושר מאובזר היטב',
+                    profile.gender === 'female' ? 'שעות שחייה נפרדות לנשים' : 'שעות פעילות נוחות'
                 ],
-                testimonials: [
-                    `"התחלתי בדיוק כמוך - מהסס${genderSuffix}. היום אני לא מפספס${genderSuffix} אימון"`,
-                    `"ההחלטה הכי טובה שעשיתי השנה"`,
-                    `"הצוות המקצועי פשוט מדהים"`
-                ],
-                urgency: [
-                    `המחיר המיוחד הזה הוא באמת רק להיום`,
-                    `אפשר להתחיל כבר מחר`,
-                    `למה לדחות את ההרגשה הטובה?`
-                ]
+                facilities: {
+                    pool: [
+                        'בריכה מקורה ומחוממת',
+                        'מסלולי שחייה',
+                        profile.gender === 'female' ? 'שעות נפרדות לנשים' : 'שעות פעילות נוחות'
+                    ],
+                    gym: [
+                        'ציוד חדיש ומקצועי',
+                        'מגוון מכשירים',
+                        'אזורי אימון שונים'
+                    ]
+                }
             }
         };
 
         return responses[reason];
     };
 
-    useEffect(() => {
-        calculatePrice();
-    }, [profile.status]);
-
-    const calculatePrice = () => {
-        const basePrice = profile.status === 'student' ? 322 : 
-                         profile.status === 'soldier' ? 211 : 
-                         profile.status === 'senior' ? 312 : 393;
-        setMonthlyPrice(basePrice);
-    };
-
-    const handleCloseDeal = () => {
-        const dealData = {
-            name: profile.name,
-            gender: profile.gender,
-            status: profile.status,
-            goals: profile.goal,
-            subGoals: profile.subGoals,
-            price: monthlyPrice,
-            dateTime: new Date().toISOString(),
-            recommendedClasses: getRecommendedClasses(profile.goal),
-            sectionCode: profile.status === 'student' ? '489' : 
-                        profile.status === 'soldier' ? '842' :
-                        profile.status === 'senior' ? '894' : '721'
-        };
-
-        setSavedDealData(dealData);
-        setDealStatus('closed');
-        localStorage.setItem('lastDeal', JSON.stringify(dealData));
-    };
-
-    const handleRejection = (reason) => {
-        setRejectionReason(reason);
-        setShowRejectionResponse(true);
-        onUpdate('rejectionReason', reason);
-    };
-
-    const pitch = generatePersonalizedPitch();
-
     return (
-        <div className="space-y-8">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl"
-            >
-                <h3 className="text-2xl font-bold text-blue-800 mb-4">{pitch.opening}</h3>
-                <div className="space-y-4">
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="bg-white p-4 rounded-lg shadow-sm"
-                    >
-                        <div className="flex items-start text-gray-700">
-                            <Target className="w-5 h-5 ml-2 mt-1 text-blue-500 flex-shrink-0" />
-                            <div>
-                                <p className="font-medium mb-2">{pitch.personalizedIntro}</p>
-                                <div className="text-sm space-y-2">
-                                    <p>השיעורים המומלצים במיוחד בשבילך:</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                                        {getRecommendedClasses(profile.goal).map((classInfo, idx) => (
-                                            <motion.div
-                                                key={idx}
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: idx * 0.1 }}
-                                                className="flex items-center bg-blue-50 p-2 rounded-lg"
-                                            >
-                                                <Check className="w-4 h-4 text-blue-500 ml-2 flex-shrink-0" />
-                                                <div>
-                                                    <span className="font-medium">{classInfo.name}</span>
-                                                    <span className="text-sm text-gray-600"> - {classInfo.benefit}</span>
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="bg-white p-4 rounded-lg shadow-sm"
-                    >
-                        <div className="flex items-start">
-                            <Clock className="w-5 h-5 ml-2 mt-1 text-blue-500 flex-shrink-0" />
-                            <div>
-                                <p className="font-medium mb-2">{pitch.timeRecommendation}</p>
-                                <div className="grid grid-cols-2 gap-2 mt-2">
-                                    {profile.availability.map((time, idx) => (
-                                        <div key={idx} className="text-sm bg-green-50 p-2 rounded-lg">
-                                            {CLIENT_PROFILE.availability[time].text}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 }}
-                        className="bg-white p-4 rounded-lg shadow-sm"
-                    >
-                        <div className="flex items-start">
-                            <Dumbbell className="w-5 h-5 ml-2 mt-1 text-blue-500 flex-shrink-0" />
-                            <div>
-                                <p className="font-medium">{pitch.experienceLevel}</p>
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
-            </motion.div>
-
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl"
-            >
-                <div className="flex justify-between items-center mb-6">
-                    <h4 className="text-xl font-bold">המסלול המומלץ עבורך</h4>
-                    <Award className="w-6 h-6 text-yellow-500" />
-                </div>
-
-                <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <motion.div
-                            className="space-y-2"
-                            animate={{ scale: [1, 1.02, 1] }}
-                            transition={{ repeat: Infinity, duration: 2 }}
-                        >
-                            <div className="text-3xl font-bold text-blue-600">
-                                {monthlyPrice}₪
-                                <span className="text-lg text-gray-500 mr-2">לחודש</span>
-                            </div>
-                            <div className="text-sm text-green-600">
-                                פחות מ-{Math.round(monthlyPrice / 30)}₪ ליום!
-                            </div>
-                            <motion.div 
-                                className="inline-block bg-red-50 px-2 py-1 rounded-full text-xs text-red-600 font-bold"
-                                animate={{ scale: [1, 1.1, 1] }}
-                                transition={{ repeat: Infinity, duration: 1.5 }}
-                            >
-                                נותרו עוד 3 מקומות במחיר הזה!
-                            </motion.div>
-                        </motion.div>
-
-                        <div className="space-y-2">
-                            {profile.subGoals.map((goal, index) => (
-                                <motion.div 
-                                    key={index}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: index * 0.1 }}
-                                    className="flex items-center"
-                                >
-                                    <Check className="w-4 h-4 text-green-500 ml-2 flex-shrink-0" />
-                                    <span className="text-gray-700">{goal}</span>
-                                </motion.div>
-                            ))}
+        <AnimatePresence mode="wait">
+            {!rejectionReason ? (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="space-y-6"
+                >
+                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 shadow-lg rounded-xl">
+                        <div className="p-6">
+                            <SummaryHeader profile={profile} />
+                            <RecommendedActivities 
+                                profile={profile} 
+                                recommendations={goalRecommendations} 
+                            />
+                            <FacilitiesSection 
+                                profile={profile}
+                            />
+                            <PriceSection 
+                                monthlyPrice={monthlyPrice} 
+                                status={profile.status}
+                            />
+                            <ActionButtons 
+                                onClose={handleCloseDeal}
+                                onReject={setRejectionReason}
+                            />
                         </div>
                     </div>
+                </motion.div>
+            ) : (
+                <RejectionResponseCard 
+                    reason={rejectionReason}
+                    response={generateRejectionResponse(rejectionReason)}
+                    onBack={() => setRejectionReason(null)}
+                    profile={profile}
+                />
+            )}
+        </AnimatePresence>
+    );
+};
 
-                    {profile.gender === 'female' && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-purple-50 p-4 rounded-lg"
+// Sub-components
+const SummaryHeader = ({ profile }) => {
+    const genderSuffix = profile.gender === 'female' ? 'ה' : '';
+    
+    return (
+        <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y:0 }}
+            transition={{ duration: 0.5 }}
+        >
+            <motion.h2 
+                className="text-2xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text"
+                whileHover={{ scale: 1.02 }}
+            >
+                {profile.name}, המתקנים שלנו מחכים לך! 🎯
+            </motion.h2>
+            <p className="text-gray-600">
+                בחדר הכושר ובבריכה תמצא${genderSuffix} את כל מה שצריך למטרות שבחרת
+            </p>
+        </motion.div>
+    );
+};
+
+const RecommendedActivities = ({ profile, recommendations }) => {
+    const activities = recommendations[profile.subGoals[0]] || [];
+    
+    return (
+        <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+        >
+            <h3 className="text-xl font-semibold mb-3">הפעילויות המומלצות במיוחד בשבילך:</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {activities.map((activity, idx) => (
+                    <motion.div 
+                        key={idx}
+                        className="flex items-start space-x-3 rtl:space-x-reverse bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                        whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                    >
+                        <span className="text-2xl">{activity.icon}</span>
+                        <div>
+                            <h4 className="font-medium text-blue-600">{activity.activity}</h4>
+                            <p className="text-sm text-gray-600">{activity.reason}</p>
+                            <ul className="mt-2 space-y-1">
+                                {activity.benefits.map((benefit, bidx) => (
+                                    <li key={bidx} className="text-xs text-gray-500 flex items-center gap-1">
+                                        <Check className="w-3 h-3 text-green-500" />
+                                        {benefit}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+        </motion.div>
+    );
+};
+
+const FacilitiesSection = ({ profile }) => {
+    const facilities = [
+        {
+            title: "חדר כושר",
+            description: "ציוד מקצועי ומגוון",
+            features: [
+                "מכשירי כוח חדישים",
+                "אזור משקולות חופשיות",
+                "מכשירי קרדיו מתקדמים"
+            ],
+            icon: "💪"
+        },
+        {
+            title: "בריכה מקורה",
+            description: "בריכה מחוממת לאורך כל השנה",
+            features: [
+                "מסלולי שחייה",
+                "מים בטמפרטורה נעימה",
+                profile.gender === 'female' ? "שעות נפרדות לנשים" : "שעות פעילות נוחות"
+            ],
+            icon: "🏊‍♂️"
+        }
+    ];
+
+    return (
+        <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+        >
+            <h3 className="text-xl font-semibold mb-3">המתקנים שלנו:</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {facilities.map((facility, idx) => (
+                    <motion.div 
+                        key={idx}
+                        className="bg-white p-4 rounded-lg shadow-sm"
+                        whileHover={{ scale: 1.02 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                    >
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-2xl">{facility.icon}</span>
+                            <h4 className="font-medium">{facility.title}</h4>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{facility.description}</p>
+                        <ul className="space-y-1">
+                            {facility.features.map((feature, fidx) => (
+                                <li key={fidx} className="text-xs text-gray-500 flex items-center gap-1">
+                                    <Check className="w-3 h-3 text-green-500" />
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
+                    </motion.div>
+                ))}
+            </div>
+        </motion.div>
+    );
+};
+
+const PriceSection = ({ monthlyPrice, status }) => {
+    const dailyPrice = Math.round(monthlyPrice / 30);
+    
+    return (
+        <motion.div 
+            className="relative overflow-hidden text-center p-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg text-white mb-6"
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300 }}
+        >
+            <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20"
+                animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 180, 360],
+                }}
+                transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: "linear"
+                }}
+            />
+            
+            <div className="relative z-10">
+                <h3 className="text-xl mb-2">המסלול המומלץ עבורך</h3>
+                <motion.div 
+                    className="text-4xl font-bold mb-1"
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                >
+                    ₪{monthlyPrice}/חודש
+                </motion.div>
+                <div className="text-lg opacity-90">
+                    פחות מ-₪{dailyPrice} ליום! 🎯
+                </div>
+                
+                {status === 'student' && (
+                    <div className="mt-2 text-sm bg-white/20 px-3 py-1 rounded-full inline-block">
+                        מחיר מיוחד לסטודנטים
+                    </div>
+                )}
+                {status === 'soldier' && (
+                    <div className="mt-2 text-sm bg-white/20 px-3 py-1 rounded-full inline-block">
+                        מחיר מיוחד לחיילים
+                    </div>
+                )}
+                {status === 'senior' && (
+                    <div className="mt-2 text-sm bg-white/20 px-3 py-1 rounded-full inline-block">
+                        מחיר מיוחד לגיל השלישי
+                    </div>
+                )}
+            </div>
+        </motion.div>
+    );
+};
+
+const ActionButtons = ({ onClose, onReject }) => {
+    return (
+        <div className="space-y-4">
+            <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium shadow-lg group relative overflow-hidden"
+                onClick={onClose}
+            >
+                <motion.span
+                    className="absolute inset-0 bg-gradient-to-r from-green-400/30 to-emerald-500/30"
+                    animate={{
+                        scale: [1, 1.5, 1],
+                        rotate: [0, 180, 360],
+                    }}
+                    transition={{
+                        duration: 10,
+                        repeat: Infinity,
+                        ease: "linear"
+                    }}
+                />
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span>מעולה! אני רוצה להצטרף</span>
+                    <Sparkles className="w-5 h-5" />
+                </span>
+            </motion.button>
+            
+            <div className="grid grid-cols-2 gap-3">
+                {[
+                    { id: 'price', icon: '💰', text: 'המחיר גבוה' },
+                    { id: 'time', icon: '⏰', text: 'הזמנים לא מתאימים' },
+                    { id: 'location', icon: '📍', text: 'המיקום רחוק' },
+                    { id: 'think', icon: '🤔', text: 'צריך/ה לחשוב' }
+                ].map((reason) => (
+                    <motion.button
+                        key={reason.id}
+                        whileHover={{ scale: 1.02, backgroundColor: '#f3f4f6' }}
+                        whileTap={{ scale: 0.98 }}
+                        className="py-3 px-4 bg-white rounded-lg text-gray-700 text-sm shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 border border-gray-100"
+                        onClick={() => onReject(reason.id)}
+                    >
+                        <span>{reason.icon}</span>
+                        <span>{reason.text}</span>
+                    </motion.button>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const RejectionResponseCard = ({ reason, response, onBack, profile }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-white rounded-xl shadow-lg overflow-hidden"
+        >
+            <div className="p-6 space-y-6">
+                <motion.h3 
+                    className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    {response.title}
+                </motion.h3>
+
+                <motion.div 
+                    className="space-y-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    <div className="grid gap-3">
+                        {response.mainContent.map((point, idx) => (
+                            <motion.div
+                                key={idx}
+                                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: idx * 0.1 }}
+                            >
+                                <Check className="text-green-500 flex-shrink-0" />
+                                <span>{point}</span>
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    {reason === 'price' && (
+                        <motion.div 
+                            className="mt-6 space-y-4"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.4 }}
                         >
-                            <div className="flex items-start">
-                                <Heart className="w-5 h-5 text-purple-500 mt-1 ml-2 flex-shrink-0" />
-                                <div>
-                                    <p className="font-medium text-purple-700">
-                                        חדר כושר לנשים בהפרדה וזמני שחייה מיוחדים
-                                    </p>
-                                    <p className="text-sm text-purple-600 mt-1">
-                                        שעות שחייה לנשים: יום ג' 09:00-10:30, יום ה' 21:15-22:45
-                                    </p>
-                                </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {response.comparison.map((item, idx) => (
+                                    <motion.div
+                                        key={idx}
+                                        className="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg text-center"
+                                        whileHover={{ scale: 1.02 }}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                    >
+                                        <div className="text-lg font-semibold">{item.title}</div>
+                                        <div className="text-2xl font-bold text-blue-600 my-2">{item.price}</div>
+                                        <div className="text-sm text-gray-600">{item.note}</div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                            
+                            <div className="bg-yellow-50 border border-yellow-100 p-4 rounded-lg">
+                                <h4 className="font-semibold text-yellow-800 mb-2">💡 שווה לדעת:</h4>
+                                {response.savings.map((saving, idx) => (
+                                    <div key={idx} className="text-yellow-700 text-sm mb-1">• {saving}</div>
+                                ))}
                             </div>
                         </motion.div>
                     )}
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-orange-50 p-4 rounded-lg"
-                    >
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center">
-                                <Star className="w-5 h-5 text-orange-500 ml-2" />
-                                <p className="font-medium text-orange-700">
-                                    הטבות למצטרפים
-                                </p>
-                            </div>
-                            <TrendingUp className="w-5 h-5 text-orange-500" />
-                        </div>
-                        <div className="space-y-2 text-sm text-orange-600">
-                            <p>• שאל/י את הנציג על הטבות מיוחדות למצטרפים חדשים!</p>
-                            <p>• אפשרות להתנסות באימון אישי</p>
-                            {profile.status && (
-                                <p>• הטבות ייחודיות {
-                                    profile.status === 'student' ? 'לסטודנטים' :
-                                    profile.status === 'soldier' ? 'לחיילים' :
-                                    'לגיל השלישי'
-                                }</p>
-                            )}
-                        </div>
-                    </motion.div>
-
-                    <motion.div 
-                        className="bg-red-50 p-4 rounded-lg"
-                        animate={{ scale: [1, 1.02, 1] }}
-                        transition={{ repeat: Infinity, duration: 2 }}
-                    >
-                        <p className="text-center text-red-600 font-bold">
-                            המחיר הזה בתוקף רק היום! מספר המקומות מוגבל
-                        </p>
-                    </motion.div>
-                </div>
-            </motion.div>
-
-            {!dealStatus && !showRejectionResponse && (
-                <div className="flex justify-center gap-4">
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleCloseDeal}
-                        className="px-8 py-3 bg-green-600 text-white rounded-lg font-bold flex items-center"
-                    >
-                        <ThumbsUp className="w-5 h-5 ml-2" />
-                        {profile.gender === 'female' ? 'סגרנו! בואי נתחיל' : 'סגרנו! בוא נתחיל'}
-                    </motion.button>
-                    
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setShowFeedbackForm(true)}
-                        className="px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-bold flex items-center"
-                    >
-                        <ThumbsDown className="w-5 h-5 ml-2" />
-                        לא עכשיו
-                    </motion.button>
-                </div>
-            )}
-
-            <AnimatePresence>
-                {showFeedbackForm && !showRejectionResponse && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="bg-white p-6 rounded-xl shadow-sm"
-                    >
-                        <h4 className="text-lg font-bold mb-4">
-                            {profile.gender === 'female' ? 'מה מונע ממך להצטרף היום?' : 'מה מונע ממך להצטרף היום?'}
-                        </h4>
-                        <div className="grid grid-cols-2 gap-3">
-                            {[
-                                { id: 'price', text: 'המחיר גבוה מדי', icon: '💰' },
-                                { id: 'time', text: 'הזמנים לא מתאימים', icon: '⏰' },
-                                { id: 'location', text: 'המיקום רחוק', icon: '📍' },
-                                { id: 'think', text: 'צריך/ה לחשוב על זה', icon: '🤔' }
-                            ].map(reason => (
-                                <motion.button
-                                    key={reason.id}
-                                    whileHover={{ scale: 1.02 }}
-                                    className="p-4 border rounded-lg text-right hover:bg-gray-50"
-                                    onClick={() => handleRejection(reason.id)}
-                                >
-                                    <span className="text-2xl mr-2">{reason.icon}</span>
-                                    {reason.text}
-                                </motion.button>
-                            ))}
-                        </div>
-                    </motion.div>
-                )}
-
-                {showRejectionResponse && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-white p-6 rounded-xl shadow-lg space-y-6"
-                    >
-                        {rejectionReason && (
-                            <>
-                                <motion.h3 
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="text-xl font-bold text-blue-800"
-                                >
-                                    {generateRejectionResponse(rejectionReason).title}
-                                </motion.h3>
-
-                                <div className="space-y-4">
-                                    {generateRejectionResponse(rejectionReason).points.map((point, idx) => (
-                                        <motion.div
-                                            key={idx}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: idx * 0.1 }}
-                                            className="flex items-start"
-                                        >
-                                            <Check className="w-5 h-5 text-green-500 ml-2 flex-shrink-0" />
-                                            <p className="text-gray-700">{point}</p>
-                                        </motion.div>
-                                    ))}
-                                </div>
-
-                                {rejectionReason === 'think' && (
-                                    <div className="space-y-3 bg-blue-50 p-4 rounded-lg">
-                                        {generateRejectionResponse(rejectionReason).testimonials.map((testimonial, idx) => (
-                                            <motion.div
-                                                key={idx}
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                transition={{ delay: 0.5 + idx * 0.1 }}
-                                                className="text-blue-700 italic"
-                                            >
-                                                {testimonial}
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                <div className="bg-orange-50 p-4 rounded-lg space-y-2">
-                                    {generateRejectionResponse(rejectionReason).urgency.map((point, idx) => (
-                                        <motion.p
-                                            key={idx}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            transition={{ delay: 1 + idx * 0.1 }}
-                                            className="text-orange-700"
-                                        >
-                                            {point}
-                                        </motion.p>
-                                    ))}
-                                </div>
-
-                                <div className="flex justify-center">
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={handleCloseDeal}
-                                        className="px-8 py-3 bg-green-600 text-white rounded-lg font-bold flex items-center"
-                                    >
-                                        <Star className="w-5 h-5 ml-2" />
-                                        בוא/י נסגור את זה עכשיו במחיר המיוחד
-                                    </motion.button>
-                                </div>
-                            </>
-                        )}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {dealStatus === 'closed' && savedDealData && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="bg-green-50 p-6 rounded-xl"
-                >
-                    <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-lg font-bold text-green-800">מעולה! המסע שלך מתחיל!</h4>
-                        <Award className="w-6 h-6 text-green-600" />
-                    </div>
-                    <div className="space-y-3">
-                        <div className="flex justify-between items-center bg-white p-3 rounded-lg">
-                            <span className="font-medium">שם</span>
-                            <span>{savedDealData.name}</span>
-                        </div>
-                        <div className="flex justify-between items-center bg-white p-3 rounded-lg">
-                            <span className="font-medium">מסלול</span>
-                            <span>{savedDealData.status || 'רגיל'}</span>
-                        </div>
-                        <div className="flex justify-between items-center bg-white p-3 rounded-lg">
-                            <span className="font-medium">מחיר חודשי</span>
-                            <span className="text-green-600 font-bold">{savedDealData.price}₪</span>
-                        </div>
-                        <div className="flex justify-between items-center bg-white p-3 rounded-lg">
-                            <span className="font-medium">קוד סעיף</span>
-                            <span className="font-mono">{savedDealData.sectionCode}</span>
-                        </div>
-                        <div className="flex justify-between items-center bg-white p-3 rounded-lg">
-                            <span className="font-medium">תאריך הצטרפות</span>
-                            <span>{new Date(savedDealData.dateTime).toLocaleDateString('he-IL')}</span>
-                        </div>
+                    <div className="flex gap-4 mt-6">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium"
+                            onClick={onBack}
+                        >
+                            אני רוצה להצטרף!
+                        </motion.button>
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="py-3 px-6 bg-gray-100 text-gray-700 rounded-lg"
+                            onClick={onBack}
+                        >
+                            חזרה
+                        </motion.button>
                     </div>
                 </motion.div>
-            )}
-        </div>
+            </div>
+        </motion.div>
     );
 };
 
