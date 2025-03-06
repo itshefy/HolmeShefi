@@ -10,7 +10,7 @@ export const PasswordProtection = ({ children }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (password === 'בה') {
+    if (password === 'לו') {
       setIsAuthenticated(true);
       setError('');
     } else {
