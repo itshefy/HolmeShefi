@@ -39,8 +39,7 @@ const PasswordProtection = ({ onAuthenticate }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Changed password from "בה" to "לו"
-    if (password === 'לו') {
+    if (password === 'א') {
       onAuthenticate();
     } else {
       setError(true);
