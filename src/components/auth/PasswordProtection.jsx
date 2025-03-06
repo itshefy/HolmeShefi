@@ -1,85 +1,119 @@
-// src/components/auth/PasswordProtection.jsx
 import React, { useState } from 'react';
-import { Shield, Eye, EyeOff } from 'lucide-react';
+import { 
+  Box, 
+  Container, 
+  TextField, 
+  Button, 
+  Typography, 
+  Paper,
+  InputAdornment,
+  IconButton
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import LockIcon from '@mui/icons-material/Lock';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import holmesLogo from '../../assets/holmes-logo.png';
 
-export const PasswordProtection = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  maxWidth: '400px',
+  margin: '0 auto',
+  marginTop: theme.spacing(8),
+  borderRadius: theme.spacing(2),
+  boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+}));
+
+const Logo = styled('img')({
+  width: '180px',
+  marginBottom: '20px',
+});
+
+const PasswordProtection = ({ onAuthenticate }) => {
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Changed password from "בה" to "לו"
     if (password === 'לו') {
-      setIsAuthenticated(true);
-      setError('');
+      onAuthenticate();
     } else {
-      setPassword('');
-      setError('סיסמה שגויה');
+      setError(true);
     }
   };
 
-  if (isAuthenticated) {
-    return children;
-  }
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full">
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Shield className="w-8 h-8 text-blue-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            מערכת מכירות הולמס פלייס
-          </h1>
-          <p className="text-gray-600 mt-2">
-            יש להזדהות כדי להמשיך
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full p-4 pr-12 rounded-lg border ${
-                  error ? 'border-red-500' : 'border-gray-200'
-                } focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none`}
-                placeholder="הכנס/י סיסמה"
-                dir="rtl"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-            {error && (
-              <p className="text-red-500 text-sm mt-2">
-                {error}
-              </p>
-            )}
-          </div>
-
-          <button
+    <Container component="main" maxWidth="xs" sx={{ direction: 'rtl' }}>
+      <StyledPaper elevation={3}>
+        <Logo src={holmesLogo} alt="Holmes Place Logo" />
+        <Typography component="h1" variant="h5" gutterBottom sx={{ mb: 3 }}>
+          מערכת סגירת מכירות
+        </Typography>
+        
+        <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="סיסמה"
+            type={showPassword ? 'text' : 'password'}
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError(false);
+            }}
+            error={error}
+            helperText={error ? 'סיסמה שגויה' : ''}
+            autoFocus
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockIcon color="primary" />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Button
             type="submit"
-            className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105"
+            fullWidth
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3, mb: 2, py: 1.5 }}
           >
-            כניסה למערכת
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">
-            © {new Date().getFullYear()} Omri Shefi
-          </p>
-        </div>
-      </div>
-    </div>
+            כניסה
+          </Button>
+        </Box>
+        
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+          הגישה למערכת זו מוגבלת לנציגי מכירות של הולמס פלייס בלבד
+        </Typography>
+      </StyledPaper>
+    </Container>
   );
 };
+
+export default PasswordProtection;
